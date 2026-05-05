@@ -1,0 +1,6 @@
+# Archivos compilados y ejecutables
+*.o
+editor
+test_runner
+valgrind_report.txt
+strace_report.txt
