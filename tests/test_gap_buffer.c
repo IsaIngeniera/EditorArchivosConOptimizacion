@@ -339,6 +339,9 @@ int main(void) {
     test_line_list_newline();
     test_line_list_export();
 
+    extern void run_editor_tests(int *passed, int *failed);
+    run_editor_tests(&tests_passed, &tests_failed);
+
     test_edge_cases();
 
     printf("\n================================================\n");

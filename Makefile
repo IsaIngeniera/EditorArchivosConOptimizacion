@@ -82,15 +82,15 @@ test:
 # Corre el editor bajo valgrind para detectar memory leaks.
 # La salida del test se redirige automáticamente para que
 # valgrind pueda terminar (simula un flujo de edición y salida).
-valgrind: debug
+valgrind: test
 	@echo "🔬  Corriendo bajo Valgrind..."
-	echo -e "Hola mundo\x11" | valgrind \
+	valgrind \
 	    --leak-check=full \
 	    --show-leak-kinds=all \
 	    --track-origins=yes \
 	    --verbose \
 	    --log-file=valgrind_report.txt \
-	    ./$(TARGET)
+	    ./$(TESTBIN)
 	@echo "📄  Reporte de Valgrind guardado en valgrind_report.txt"
 
 # ── Strace (para Persona 3) ──────────────────────────────────
@@ -99,7 +99,7 @@ valgrind: debug
 # comparar el enfoque clásico vs nuestro enfoque optimizado.
 strace-profile:
 	@echo "📊  Profiling con strace..."
-	echo -e "Hola mundo\x13\x11" | strace -c -o strace_report.txt ./$(TARGET)
+	printf "Hola mundo\023\030s" | strace -c -o strace_report.txt ./$(TARGET)
 	@echo "📄  Reporte de strace guardado en strace_report.txt"
 	cat strace_report.txt
 
