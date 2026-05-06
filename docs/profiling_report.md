@@ -205,11 +205,6 @@ ls -lh test_document_small.txt /tmp/out_classic.txt small
 - Tiempo total en Kernel Mode: 0.035360 segundos
 ```
 
-**Interpretación (completar tras ejecutar):**
-- Total de syscalls `write()`: [X] llamadas
-- Uso de `mmap()` para lectura: [1] llamada (carga completa en una sola operación)
-- Tiempo total en Kernel Mode: [X] segundos
-```
 ---
 
 ## 4. Comparativa: Métricas Clave
