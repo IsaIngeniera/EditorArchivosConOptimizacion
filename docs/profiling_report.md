@@ -203,7 +203,6 @@ ls -lh test_document_small.txt /tmp/out_classic.txt small
 - Total de syscalls `write()`: 37 llamadas
 - Uso de `mmap()` para lectura: 17 llamada (carga completa en una sola operación)
 - Tiempo total en Kernel Mode: 0.035360 segundos
-```
 
 ---
 
