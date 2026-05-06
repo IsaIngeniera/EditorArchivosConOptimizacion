@@ -384,3 +384,6 @@ Si el archivo tiene 1000 líneas y la terminal solo mide 30 líneas de alto, la 
 
 ### 9.3. Decodificación de Atributos (Spans)
 Al dibujar una línea, la interfaz consulta los `Spans` del nodo actual. Activa funciones especiales de `ncurses` como `wattron(A_BOLD)` para negrita o cambia los pares de colores si detecta que la posición del carácter intercepta el rango definido por un estilo de texto enriquecido, apagándolos con `wattroff` cuando el rango termina.
+
+<img width="553" height="401" alt="image" src="https://github.com/user-attachments/assets/9e10434f-0fde-4ee7-89fe-bd3f4dd825a0" />
+
