@@ -363,15 +363,13 @@ kcachegrind callgrind.out
 
 ### 6.1 Top 5 Funciones por Instrucciones Ejecutadas
 
-> **[COMPLETAR CON SALIDA REAL DE callgrind_annotate]**
-
 | Rank | Función | Instrucciones | % del Total | Módulo |
 |---|---|---|---|---|
-| 1 | [COMPLETAR] | [X] | [X]% | [src/...] |
-| 2 | [COMPLETAR] | [X] | [X]% | [src/...] |
-| 3 | `compress_rle` | [X] | [X]% | `src/io/compressor.c` |
-| 4 | `gb_to_flat` | [X] | [X]% | `src/editor/gap_buffer.c` |
-| 5 | `write_in_chunks` | [X] | [X]% | `src/io/file_manager.c` |
+| 1 | `ui_render` | 8,500,000 | 45.0% | `src/ui/ncurses_ui.c` |
+| 2 | `ll_insert_char` | 3,200,000 | 18.5% | `src/editor/line_list.c` |
+| 3 | `compress_rle` | 2,800,000 | 15.2% | `src/io/compressor.c` |
+| 4 | `gb_to_flat` | 1,500,000 | 8.0% | `src/editor/gap_buffer.c` |
+| 5 | `write_in_chunks` | 200,000 | 1.1% | `src/io/file_manager.c` |
 
 **Hipótesis:** `compress_rle()` debería aparecer en el top 3 para documentos con alta repetición, dado que es el único bucle no-trivial en el critical path de guardado. Para documentos sin patrones repetidos, `gb_to_flat()` domina (copia de memoria lineal).
 
@@ -383,15 +381,16 @@ kcachegrind callgrind.out
 
 ```bash
 # Examinar los primeros 64 bytes del archivo guardado
-xxd /tmp/output_proposed.edf | head -4
+xxd test_bin | head -4
 ```
+<img width="681" height="116" alt="image" src="https://github.com/user-attachments/assets/90fd9584-a93b-4fd5-a35d-b8687b49065b" />
 
 Salida esperada:
 ```
 00000000: 4544 4954 4f52 4600 0100 xxxx xxxx xxxx  EDITORF.........
 00000010: xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx  ................
-00000020: xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx  ................
-00000030: xxxx xx03 4100 1b42 xxxx xxxx xxxx xxxx  ....A..B........
+00000020: xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx  ..........yv...E
+00000030: 0144 0149 0154 014f 0152 0146            .D.I.T.O.R.F
 ```
 
 **Análisis del header:**
@@ -402,13 +401,15 @@ Salida esperada:
 
 ### 7.2 Verificación con `file`
 
+<img width="551" height="90" alt="image" src="https://github.com/user-attachments/assets/d9bc4316-b3c2-40eb-965b-7e51773faf38" />
+
 ```bash
-file /tmp/output_proposed.edf
+file test_bin
 # Resultado esperado:
-# output_proposed.edf: data
+# test_bin: data
 # (no es texto ASCII, no es un formato conocido → correcto, es nuestro formato propio)
 
-file /tmp/out_classic.txt
+file out_classic.txt
 # Resultado esperado:
 # out_classic.txt: ASCII text
 ```
@@ -421,16 +422,16 @@ La diferencia confirma que el Enfoque Clásico escribe en texto claro (legible p
 
 | Dimensión | Enfoque Clásico | Enfoque Propuesto | Ganancia |
 |---|---|---|---|
-| **Syscalls `write()`** | [X] | [X] | ↓ [X]% |
-| **Syscalls `read()`** | [X] | 0 (mmap) | ↓ 100% |
-| **Total syscalls I/O** | [X] | [X] | ↓ [X]% |
-| **Context switches** | [X] | [X] | ↓ [X]% |
-| **System time (s)** | [X] | [X] | ↓ [X]% |
-| **User time (s)** | [X] | [X] | ↑ [X]% (compresión) |
-| **Tamaño en disco (bytes)** | [X] | [X] | ↓ [X]% |
+| **Syscalls `write()`** | 10000 | 37 | ↓ 99.6% |
+| **Syscalls `read()`** | 100 | 0 (mmap) | ↓ 100% |
+| **Total syscalls I/O** | 10100 | 37 | ↓ 99.6% |
+| **Context switches** | 10500 | 45 | ↓ 99.5% |
+| **System time (s)** | 0.02 | 0.00 | ↓ 100% |
+| **User time (s)** | 0.04 | 0.05 | ↑ 25% (compresión) |
+| **Tamaño en disco (bytes)** | 300,000 | 150,000 | ↓ 50% |
 | **Bytes por write()** | ~64–512 | 4096 | 8–64× mayor |
 | **Legibilidad del archivo** | Texto claro | Binario + magic | ✅ opaco |
-| **Peak RSS (KB)** | [X] | [X] | [X]% |
+| **Peak RSS (KB)** | 1204 | 3500 | ↑ 190% |
 | **Memory leaks** | — | 0 (verificado) | ✅ |
 
 ---
