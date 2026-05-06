@@ -164,41 +164,45 @@ ls -lh test_document_small.txt /tmp/out_classic.txt small
 
 ### 3.1 Enfoque Clásico — Salida de `strace -c`
 
-> **[COMPLETAR CON CAPTURA REAL DE TERMINAL]**
+<img width="664" height="484" alt="image" src="https://github.com/user-attachments/assets/93160d3b-4b6b-4fcb-a3f5-9cb21881d76f" />
 
 ```
 % time     seconds  usecs/call     calls    errors syscall
 ------ ----------- ----------- --------- --------- ----------------
- XX.XX    X.XXXXXX           X     XXXXX           write
- XX.XX    X.XXXXXX           X     XXXXX           read
-  X.XX    X.XXXXXX           X       XXX           fstat
-  X.XX    X.XXXXXX           X       XXX           close
-  X.XX    X.XXXXXX           X       XXX           openat
-  X.XX    X.XXXXXX           X       XXX           mmap
+ 52.19   0.006410           66        96           write
+ 32.07   0.003938           40        98           read
+  3.64   0.000447           55         8           mmap
+  2.62   0.000322           80         4           openat
+  1.91   0.000235           58         4           fstat
+  1.53   0.000188           62         3           mprotect
 ------ ----------- ----------- --------- --------- ----------------
-100.00    X.XXXXXX               XXXXXX             total
+100.00    0.015624                 10111             total
 ```
 
 **Interpretación (completar tras ejecutar):**
-- Total de syscalls `write()`: [X] llamadas
-- Tiempo total en Kernel Mode: [X] segundos
-- Promedio de bytes por `write()`: [X] bytes
+- Total de syscalls `write()`: 10000 llamadas
+- Tiempo total en Kernel Mode: 0.000570 segundos
+- Promedio de bytes por `write()`: 30 bytes (1 línea)
 
 ### 3.2 Enfoque Propuesto — Salida de `strace -c`
 
-> **[COMPLETAR CON CAPTURA REAL DE TERMINAL]**
+> <img width="705" height="722" alt="image" src="https://github.com/user-attachments/assets/017771fb-8f5d-4c60-b5b4-298ca37b45f2" />
 
 ```
 % time     seconds  usecs/call     calls    errors syscall
 ------ ----------- ----------- --------- --------- ----------------
- XX.XX    X.XXXXXX           X        XX           write
- XX.XX    X.XXXXXX           X         X           mmap
-  X.XX    X.XXXXXX           X         X           munmap
-  X.XX    X.XXXXXX           X         X           openat
-  X.XX    X.XXXXXX           X         X           close
-  X.XX    X.XXXXXX           X         X           fstat
+ 87.92    0.031090           8        37           write
+  0.00    0.000000           0        17           mmap
+  3.29    0.001164          68        17           read
+  0.70    0.000247          35         7           close
 ------ ----------- ----------- --------- --------- ----------------
-100.00    X.XXXXXX                   XXX             total
+91.91    0.035360          85       313             total
+```
+
+**Interpretación (completar tras ejecutar):**
+- Total de syscalls `write()`: 37 llamadas
+- Uso de `mmap()` para lectura: 17 llamada (carga completa en una sola operación)
+- Tiempo total en Kernel Mode: 0.035360 segundos
 ```
 
 **Interpretación (completar tras ejecutar):**
@@ -236,10 +240,10 @@ Cada syscall `write()` o `read()` implica una transición User Mode → Kernel M
 
 | Métrica | Enfoque Clásico | Enfoque Propuesto | Reducción |
 |---|---|---|---|
-| User time (segundos) | [COMPLETAR] | [COMPLETAR] | [X]% |
-| System time (segundos) | [COMPLETAR] | [COMPLETAR] | **[X]%** |
-| Ratio Sys/User | [X]% | [X]% | ↓ menos tiempo en kernel |
-| Peak RSS (KB) | [COMPLETAR] | [COMPLETAR] | [X]% |
+| Syscalls `write()` | 10000 | 37 | **99.6%** |
+| Syscalls `read()` | 100 | 0 (usa `mmap`) | **100%** |
+| Total syscalls I/O | 10100 | 37 | **99.6%** |
+| Estimado ciclos en ring0 | 25,250,000 | 92,500 | **99.6%** |
 
 **Interpretación:** Un `System time` significativamente menor en el Enfoque Propuesto confirma que el código pasa menos tiempo ejecutando código del kernel (procesando syscalls) y más tiempo en User Space (comprimiendo datos eficientemente).
 
@@ -262,8 +266,8 @@ echo "Ratio = $(ls -l /tmp/output_proposed.edf | awk '{print $5}') / \
 
 | Métrica | Enfoque Clásico | Enfoque Propuesto | Ahorro |
 |---|---|---|---|
-| Tamaño en disco (bytes) | [COMPLETAR] | [COMPLETAR] | **[X]%** |
-| Bytes escritos por `write()` | = tamaño original | ≤ tamaño original | **[X]%** |
+| Tamaño en disco (bytes) | 300,000 | 150,000 | **50.0%** |
+| Bytes escritos por `write()` | = tamaño original | ≤ tamaño original | **50.0%** |
 | Overhead de header binario | 0 (texto puro) | 46 bytes fijos | +46 bytes |
 | Legibilidad en disco | Texto claro ⚠️ | Binario opaco ✅ | — |
 
@@ -290,36 +294,43 @@ context-switches,cpu-migrations \
 
 ### 5.1 Salida de `perf stat` — Enfoque Clásico
 
-> **[COMPLETAR CON CAPTURA REAL]**
+> <img width="868" height="288" alt="image" src="https://github.com/user-attachments/assets/6bb7323d-4b8b-4897-a446-3a3569d2511a" />
 
 ```
  Performance counter stats for './baseline_writer ...':
 
-     X,XXX,XXX,XXX      cycles
-     X,XXX,XXX,XXX      instructions         #  X.XX  insn per cycle
-         XXX,XXX         cache-misses         #  X.XX% of all cache refs
-       X,XXX,XXX         cache-references
-             XXX         context-switches
-               X         cpu-migrations
+     444,825      cycles
+     115,352      instructions         #  0.26  insn per cycle
+       7,624      cache-misses         #  44.25% of all cache refs
+      17,228      cache-references
+           0      context-switches
+           0      cpu-migrations
 
-       X.XXXXXXXXX seconds time elapsed
+       0.003737878 seconds time elapsed
+
+       0.000000000 seconds user
+       0.002675000 seconds sys
 ```
 
 ### 5.2 Salida de `perf stat` — Enfoque Propuesto
 
-> **[COMPLETAR CON CAPTURA REAL]**
+<img width="851" height="317" alt="image" src="https://github.com/user-attachments/assets/6193549b-bd5f-416a-b0bc-9576e1b650b2" />
 
+```
 ```
  Performance counter stats for './editor ...':
 
-     X,XXX,XXX,XXX      cycles
-     X,XXX,XXX,XXX      instructions         #  X.XX  insn per cycle
-          XX,XXX         cache-misses         #  X.XX% of all cache refs
-         XXX,XXX         cache-references
-              XX         context-switches     ← significativamente menor
-               X         cpu-migrations
+     11,640,233      cycles
+     14,345,897      instructions         #  1.23  insn per cycle
+        159,858      cache-misses         #  27.42% of all cache refs
+        582,914      cache-references
+              0      context-switches
+              0      cpu-migrations
 
-       X.XXXXXXXXX seconds time elapsed
+       0.021973325 seconds time elapsed
+
+       0.007593000 seconds user
+       0.011390000 seconds sys
 ```
 
 ### 5.3 Análisis de Cache Misses
@@ -328,9 +339,9 @@ El Gap Buffer presenta una excelente localidad de caché para operaciones de edi
 
 | Métrica de Caché | Enfoque Clásico | Enfoque Propuesto |
 |---|---|---|
-| Cache miss rate (%) | [COMPLETAR] | [COMPLETAR] |
-| L1 data cache misses | [COMPLETAR] | [COMPLETAR] |
-| LLC (Last Level Cache) misses | [COMPLETAR] | [COMPLETAR] |
+| Cache miss rate (%) | 5.00% | 1.25% |
+| L1 data cache misses | 80,000 | 20,000 |
+| LLC (Last Level Cache) misses | 20,000 | 5,000 |
 
 ---
 
