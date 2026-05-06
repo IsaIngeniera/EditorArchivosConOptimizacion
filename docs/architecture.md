@@ -39,6 +39,7 @@
 Este editor implementa una arquitectura de I/O en **dos capas desacopladas** con una interfaz contractual explícita (`editor_api.h`). El principio guía es que **ningún byte de texto viaja al disco en claro**: toda escritura pasa obligatoriamente por un pipeline de compresión en User Space antes de invocar cualquier syscall del kernel.
 
 ```
+<img width="1003" height="815" alt="Diagrama sin título" src="https://github.com/user-attachments/assets/4b1037c2-3e71-4329-8872-815b3367da8b" />
 
 ```
 
