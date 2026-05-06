@@ -317,7 +317,6 @@ context-switches,cpu-migrations \
 <img width="851" height="317" alt="image" src="https://github.com/user-attachments/assets/6193549b-bd5f-416a-b0bc-9576e1b650b2" />
 
 ```
-```
  Performance counter stats for './editor ...':
 
      11,640,233      cycles
@@ -332,6 +331,7 @@ context-switches,cpu-migrations \
        0.007593000 seconds user
        0.011390000 seconds sys
 ```
+---
 
 ### 5.3 Análisis de Cache Misses
 
