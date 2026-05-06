@@ -72,11 +72,11 @@ print('\n'.join(lines))
 " > test_document_small.txt
 ```
 
-# Verificar tamaño y número de líneas
+### Verificar tamaño y número de líneas
 wc -l test_document_small.txt
 wc -c test_document_small.txt
 
-#Resultado esperado 
+###Resultado esperado 
 
 200 test_document_small.txt
 6047 test_document_small.txt
